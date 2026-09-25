@@ -1,0 +1,7 @@
+node_modules
+dist
+coverage
+oracle/target
+*.log
+.DS_Store
+*.tgz

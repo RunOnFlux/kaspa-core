@@ -1,0 +1,89 @@
+{
+  "name": "@runonflux/kaspa-core",
+  "version": "1.0.0",
+  "description": "Pure-TypeScript Kaspa transaction library: addresses, scripts, M-of-N P2SH multisig, sighash, BIP340 signing, KIP-9 mass and fee, input selection. No WASM, two dependencies.",
+  "license": "MIT",
+  "author": "RunOnFlux",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RunOnFlux/kaspa-core.git"
+  },
+  "homepage": "https://github.com/RunOnFlux/kaspa-core#readme",
+  "bugs": {
+    "url": "https://github.com/RunOnFlux/kaspa-core/issues"
+  },
+  "keywords": [
+    "kaspa",
+    "multisig",
+    "p2sh",
+    "schnorr",
+    "bip340",
+    "wallet"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./rest": {
+      "types": "./dist/rest.d.ts",
+      "import": "./dist/rest.js",
+      "default": "./dist/rest.js"
+    },
+    "./wrpc": {
+      "types": "./dist/wrpc.d.ts",
+      "import": "./dist/wrpc.js",
+      "default": "./dist/wrpc.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:live": "KASPA_LIVE=1 vitest run test/live",
+    "oracle:build": "cargo build --release --manifest-path oracle/Cargo.toml",
+    "fixtures": "KASPA_WRITE_FIXTURES=1 vitest run test/generate-fixtures.test.ts",
+    "prepublishOnly": "yarn type-check && yarn lint && yarn format:check && yarn test && yarn build",
+    "coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@noble/curves": "2.4.0",
+    "@noble/hashes": "2.4.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.6.2",
+    "@vitest/coverage-v8": "5.0.1",
+    "eslint": "10.11.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-prettier": "5.5.6",
+    "globals": "17.12.0",
+    "prettier": "3.9.9",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.1",
+    "vite": "8.3.0",
+    "vitest": "5.0.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

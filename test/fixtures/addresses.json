@@ -1,0 +1,366 @@
+{
+ "generatedBy": "kaspa-core-oracle",
+ "rustyKaspaRev": "01b532e8b553523216471682649693af92f0fd16",
+ "cases": [
+  {
+   "prefix": "kaspasim",
+   "version": 1,
+   "payload": "2ab890a06d652c17f1b72af31498155ad1c592b2a8620723a8673d73c67f394ba6",
+   "address": "kaspasim:qy4t3y9qd4jjc9l3ku40x9ycz4ddr3vjk25xyper4pnn6u7x0uu5hfsy6fnxjft"
+  },
+  {
+   "prefix": "kaspadev",
+   "version": 8,
+   "payload": "e9df03062556d303c1159f57b175db16a4ff8ccfb5eb7f303cb312c248d57ec1",
+   "address": "kaspadev:pr5a7qcxy4tdxq7pzk040vt4mvt2fluve767kles8je39sjg64lvzl2mz2xyh"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 0,
+   "payload": "964c80851f8360bc1b81d6ceaeba3aa88bd22ccf05da40a49d2362cfd808286c",
+   "address": "kaspa:qztyeqy9r7pkp0qms8tvat46825gh53veuza5s9yn53k9n7cpq5xcsjutse6p"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 8,
+   "payload": "7a60976967e4a77215a7552370cc03e2ab446837c05cd7e2ee3b93bdf1a62771",
+   "address": "kaspa:ppaxp9mfvlj2wus45a2jxuxvq032k3rgxlq9e4lzacae80035cnhzcwfldfx5"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 8,
+   "payload": "750fbd7d30b2742b1dd25e539dbfeb27465e9fd639ad48beb12cf5ec3e08d371",
+   "address": "kaspa:pp6sl0taxze8g2ca6f0988dlavn5vh5l6cu66j97kyk0tmp7prfhzk035sur5"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 1,
+   "payload": "bd827853f59d8b3cc48b3a4924ba387ba70ae427ffe9c6bba723d2cac26eb68edd",
+   "address": "kaspatest:qx7cy7zn7kwck0xy3vayjf968pa6wzhyyll7n34m5u3a9jkzd6mgahgy5ugg9wv"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 0,
+   "payload": "76d8174346f4dddcaca457f4e1c2d16460ec9b0df7d60d331f4efdcdbfbc21a9",
+   "address": "kaspa:qpmds96rgm6dmh9v53tlfcwz69jxpmymphmavrfnra80mndlhss6jnvxgyjrc"
+  },
+  {
+   "prefix": "kaspadev",
+   "version": 0,
+   "payload": "eb5e8337b0749973d6e05dba73a3d7f1cf81f4119a25e7d2fc6b4bb4f7ab4429",
+   "address": "kaspadev:qr44aqehkp6fju7kupwm5uar6lculq05zxdzte7jl345hd8h4dzzj6y5anrlq"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 0,
+   "payload": "6b7282de63cd71a6ce6556454a2aacbfb9cfa80fc651bfc64f42e67e5546f6cb",
+   "address": "kaspa:qp4h9qk7v0xhrfkwv4ty2j324jlmnnagplr9r07xfapwvlj4gmmvktwk96uk4"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 0,
+   "payload": "65802a84c2561a270a82367fc6903bd59e1c17e6d3b73f03a4ca62e503fd440c",
+   "address": "kaspa:qpjcq25ycftp5fc2sgm8l35s802eu8qhumfmw0cr5n9x9egrl4zqcef05r40n"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 1,
+   "payload": "2010453b0818399c02cd2b2aff7ae9bb829ff4ecdc11e32b37a7fca4ea0518eb4b",
+   "address": "kaspasim:qyspq3fmpqvrn8qze54j4lm6axac98l5anwprcetx7nlef82q5vwkjcvwymn6ae"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 8,
+   "payload": "9064cb61b8a488d140539b7528def6cadc0e8e5ceb1c4e7a2c4f5830dcbc14c4",
+   "address": "kaspatest:pzgxfjmphzjg352q2wdh22x77m9dcr5wtn43cnn69384svxuhs2vgj6djvfkc"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 0,
+   "payload": "49cc5f6154b260e2d401cf4c662482f63427c140e1c4c35a9847d49838c65178",
+   "address": "kaspasim:qpyuchmp2jexpck5q885ce3ystmrgf7pgrsufs66nprafxpcceghs4z7f0s8y"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 0,
+   "payload": "f749ceec55f2d690c45a3129ad5e0932384320e3a725a0aaffcd4494d7f06e30",
+   "address": "kaspa:qrm5nnhv2heddyxytgcjnt27pyerssequwnjtg92llx5f9xh7phrqg6npgpp8"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 0,
+   "payload": "5e42b89e2e38ba731d4a7dde0d5acc0ed3fe003df115a5ecbce587635fc5fe87",
+   "address": "kaspa:qp0y9wy79cut5ucaff7aur26es8d8lsq8hc3tf0vhnjcwc6lchlgwjlyzu6g6"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 1,
+   "payload": "e2376c6dd3672af73db30cb599e6970151502588e4245f39d4bc7e7a55c8be145c",
+   "address": "kaspatest:q83rwmrd6dnj4aeakvxttx0xjuq4z5p93rjzghee6j78u7j4ezlpghq2vrhgepd"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 8,
+   "payload": "9b2934b9ff6976695c1bddbbc0dde3201a5529e4bd83caa455d206b26c17dccf",
+   "address": "kaspatest:pzdjjd9ela5hv62ur0wmhsxauvsp54ffuj7c8j4y2hfqdvnvzlwv76wmzk2dz"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 8,
+   "payload": "4654e6cd30c3590892e532665905059d93fcb1fa2656b144659c04592c2b9f7f",
+   "address": "kaspatest:ppr9fekdxrp4jzyju5exvkg9qkwe8l93lgn9dv2yvkwqgkfv9w0h79l0y6r3u"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 0,
+   "payload": "d8423ef93ed67397a647036b74e5e1841ee11c16c8a8c0a8d120f8ca6eb8f8a7",
+   "address": "kaspatest:qrvyy0he8mt889axgupkka89uxzpacguzmy23s9g6ys03jnwhru2wyqmh20gx"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 8,
+   "payload": "ddf4b2389ab480fb50b1baf5d5fb14ad4c07adcac7fd9b048dbb2b38718f0a4b",
+   "address": "kaspasim:prwlfv3cn26gp76skxa0t40mzjk5cpadetrlmxcy3kajkwr33u9yk3f276clm"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 0,
+   "payload": "ccc8966bf9f68db4697f03afce1a6aa8d4c9b93ed57406d7c6099cfb9e80c454",
+   "address": "kaspasim:qrxv39ntl8mgmdrf0up6lns6d25dfjde8m2hgpkhccyee7u7srz9g9njdvww8"
+  },
+  {
+   "prefix": "kaspadev",
+   "version": 8,
+   "payload": "9601171805298ea9e79d440f02c926452747c9e74c4394276959e3263e461060",
+   "address": "kaspadev:pztqz9ccq55ca208n4zq7qkfyezjw37fuaxy89p8d9v7xf37gcgxquu2afh6k"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 8,
+   "payload": "af2d81a22d582b1a2b3e4c04e1da71bc6fcd1258b1f95b6bd88231b745e3543e",
+   "address": "kaspasim:pzhjmqdz94vzkx3t8exqfcw6wx7xlngjtzcljkmtmzprrd69ud2rum3v59g60"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 0,
+   "payload": "be16b7082b28d11546f7f4070fac8cbd645444af52aab76a197e4c8435bd8169",
+   "address": "kaspatest:qzlpddcg9v5dz92x7l6qwrav3j7kg4zy4af24dm2r9lyepp4hkqkj5za59mw7"
+  },
+  {
+   "prefix": "kaspadev",
+   "version": 0,
+   "payload": "805fd2f44881e7eb20868807d8fb819253994f0fdd71f919b2f85ef3d5317c45",
+   "address": "kaspadev:qzq9l5h5fzq706eqs6yq0k8msxf98x20plwhr7gektu9au74x97y27e86a9dc"
+  },
+  {
+   "prefix": "kaspadev",
+   "version": 8,
+   "payload": "5be240a780afefc1f172c3c59e7161040833627d85a5907f6eb709bebc6f7b85",
+   "address": "kaspadev:ppd7ys98szh7ls03wtput8n3vyzqsvmz0kz6tyrld6msn04udaac2peu6yz3x"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 0,
+   "payload": "42887468c51d33766244d23d8d45ccbea362d36eb7679c107c2eb8e428056b20",
+   "address": "kaspasim:qppgsargc5wnxanzgnfrmr29ejl2xcknd6mk08qs0sht3epgq44jqnsk3ka22"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 1,
+   "payload": "93216dbaadc50e847b7210eda22c7747cf9e519c4083516edcf33fa70a423362a0",
+   "address": "kaspa:qxfjzmd64hzsaprmwggwmg3vwarul8j3n3qgx5twmnenlfc2ggek9gq75924lwt"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 1,
+   "payload": "5ccd4ff7264931bc644af2f1f1d2ce7a6802ca97e59b18b103f04aa95306bed002",
+   "address": "kaspa:q9wv6nlhyeynr0ryfte0ruwjeeaxsqk2jljekx93q0cy422nq6ldqqskq0rzxq6"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 8,
+   "payload": "17dc1c4b1dc3912d0e8c45f92b2a5dd3e17fe28196f2af242c21d6487f0b8d8d",
+   "address": "kaspatest:pqtac8ztrhpeztgw33zlj2e2thf7zllzsxt09tey9ssavjrlpwxc6jjdh4785"
+  },
+  {
+   "prefix": "kaspadev",
+   "version": 1,
+   "payload": "c97ffdc3f9fdbd0fd18753dfec05d9414516b0b0e41cacd8c2a24562b40beb2abc",
+   "address": "kaspadev:q8yhllwrl87m6r73safalmq9m9q5294skrjpetxcc23y2c45p04j40q9rjg7jll"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 1,
+   "payload": "4bdfe6f3a62ee0e24ae90c8b434e676f62422e67294d22a02291840730b5e9823f",
+   "address": "kaspasim:q99alehn5chwpcj2ayxgks6wvahkys3wvu556g4qy2gcgpeskh5cy0cutjzxzc7"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 0,
+   "payload": "7167f64b4a6f94025bc6b5a6097e3a880259b9010ace44862a575a57aa1b1733",
+   "address": "kaspa:qpck0ajtffhegqjmc666vzt782yqykdeqy9vu3yx9ft454a2rvtnx8sqklykj"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 1,
+   "payload": "efd0cac5f6c0d82ab7e8e663ae4303c3020ed5a688658c1fd48f872b378065ed0b",
+   "address": "kaspa:q8hapjk97mqds24harnx8tjrq0psyrk456yxtrql6j8cw2ehspj76zcm0js86de"
+  },
+  {
+   "prefix": "kaspadev",
+   "version": 8,
+   "payload": "1cc81c77924778a56167077c0fdb33e0c097359be4d810dedae98cc2c9003a27",
+   "address": "kaspadev:pqwvs8rhjfrh3ftpvurhcr7mx0svp9e4n0jdsyx7mt5ceskfqqazwna4r45da"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 1,
+   "payload": "d6d00750afb2c11202b26efe918bd88da214c3794b44d4b3447d5335dc448f1a66",
+   "address": "kaspa:q8tdqp6s47evzyszkfh0ayvtmzx6y9xr0995f49ng374xdwugj835essq80jznx"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 1,
+   "payload": "ffff0538a4c072ccd6dd50a5bc581ddd06cff7eb9655891a197efdb2d7ec3e7a8e",
+   "address": "kaspatest:q8ll7pfc5nq89nxkm4g2t0zcrhwsdnlhawt9tzg6r9l0mvkhasl84rstkagchn3"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 1,
+   "payload": "b9963c218f1c87c22c7534bb7dd44356e7c9eb7e71da6258b8cd929692ff93d7f9",
+   "address": "kaspatest:qxuev0pp3uwg0s3vw56tklw5gdtw0j0t0eca5cjchrxe995jl7fa07g0uluvypm"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 0,
+   "payload": "ae6a6184c114fedf0c3189f3ca2c1fc97f949f730b99cf6de765cc657199981f",
+   "address": "kaspasim:qzhx5cvycy20ahcvxxyl8j3vrlyhl9ylwv9ennmduajucet3nxvp75phu6eku"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 1,
+   "payload": "713ae71ca5924597a665c3b7385ccad74ea78791406b0a4ae3d9ea05f4be1815d9",
+   "address": "kaspa:q9cn4ecu5kfyt9axvhpmwwzuett5afu8j9qxkzj2u0v75p05hcvptkgsgqcdaha"
+  },
+  {
+   "prefix": "kaspadev",
+   "version": 8,
+   "payload": "b3a1b6c27f0a3f1463605853d6426943dafdce2d5c973a78e0054a616b5347b5",
+   "address": "kaspadev:pze6rdkz0u9r79rrvpv984jzd9pa4lww94wfwwncuqz55ctt2drm205k7wksg"
+  },
+  {
+   "prefix": "kaspadev",
+   "version": 1,
+   "payload": "69b14a6dc0605e9d183fc1b06a61d2d12f2a854b52b38547ac2ab669ecd6c4c4b2",
+   "address": "kaspadev:q95mzjndcps9a8gc8lqmq6np6tgj7259fdft8p284s4tv60v6mzvfvs0emv8nff"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 0,
+   "payload": "c2c56fcea406fe4a1d39d11aad8f173959c0a377bc5a09283acd55293dbbad4c",
+   "address": "kaspasim:qrpv2m7w5sr0ujsa88g34tv0zuu4ns9rw7795zfg8tx422fahwk5c9nq2gasa"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 1,
+   "payload": "ddc15f783589d10fa2dd633df6c572775a80fe3ae859f5db621a9f668a96308783",
+   "address": "kaspasim:q8wuzhmcxkyazrazm43nmak9wfm44q878t59nawmvgdf7e52jccg0qcz889dgk6"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 1,
+   "payload": "9763f003464cc44372d90418e2abf72e88b7e3c98fc9e25ceaf401eca0d921e3bd",
+   "address": "kaspa:qxtk8uqrgexvgsmjmyzp3c4t7uhg3dlrex8uncjuat6qrm9qmys780gsmkyas3u"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 8,
+   "payload": "8775c6a4fbe2d297289372909d259d6b146c035dbbfa207b169413f9b276dba0",
+   "address": "kaspasim:pzrht34yl03d99egjdefp8f9n443gmqrtkal5grmz62p87djwmd6quslqs3m9"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 8,
+   "payload": "3cf4332af90b367388f5a1816e5cc7d2b497b4f37aa178aacf4b7bc16a84c29a",
+   "address": "kaspatest:pq70gve2ly9nvuug7ksczmjuclftf9a57da2z792ea9hhst2snpf5x6pyn3mg"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 8,
+   "payload": "c1d8ce083b81cfaa0c88f41afcad42ff88df0d1b98e92ba6587a79e72836ceac",
+   "address": "kaspa:prqa3nsg8wqul2sv3r6p4l9dgtlc3hcdrwvwj2axtpa8neegxm82c9tpznpt5"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 8,
+   "payload": "7855d5150a9e1660c168c92e20949cbd11b7510e8d874c12d0a538f0238fb5ce",
+   "address": "kaspasim:ppu9t4g4p20pvcxpdryjugy5nj73rd63p6xcwnqj6zjn3upr376uu9uv77ef4"
+  },
+  {
+   "prefix": "kaspadev",
+   "version": 8,
+   "payload": "788272959b1072e22412367688bfecbb2d62f497f662a2310b8984d16bb48225",
+   "address": "kaspadev:ppugyu54nvg89c3yzgm8dz9lajaj6ch5jlmx9g33pwycf5ttkjpz22skshrka"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 1,
+   "payload": "c66c8ea82b9608823fc2a6c73567969bc8a9107daf11dfe69458b6525a452e3330",
+   "address": "kaspatest:q8rxer4g9wtq3q3lc2nvwdt8j6du32gs0kh3rhlxj3vtv5j6g5hrxvq2ym2xw4n"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 1,
+   "payload": "0ed8064d3a354b7de3039aff69e454b89881684db40e8398c2fe950cbda2e7bce6",
+   "address": "kaspatest:qy8dspjd8g65kl0rqwd0760y2juf3qtgfk6qaqucctlf2r9a5tnmeespt00rzlx"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 1,
+   "payload": "2e4fffc96f08ac214a494e4b56b3ae111ccf605e4020722c15458f3338c8f2b00e",
+   "address": "kaspasim:qyhyll7fduy2cg22f98yk44n4cg3enmqteqzqu3vz4zc7veceretqrs8qz4jdhn"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 1,
+   "payload": "3a72e4e5c0e4ea49fc3978aaeaf36dbf7111b83779bb54308f6fa4ecae43a7879d",
+   "address": "kaspasim:qya89e89crjw5j0u89u246hndklhzydcxaumk4ps3ah6fm9wgwnc08gfdxw96a2"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 8,
+   "payload": "d85e715a9fa22d5dc75d4b6baa8abb45960f9de418eb463b5647e4691ea2b005",
+   "address": "kaspasim:prv9uu26n73z6hw8t49kh252hdzevruausvwk33m2er7g6g752cq2wj44klhe"
+  },
+  {
+   "prefix": "kaspa",
+   "version": 1,
+   "payload": "80044a1e9306c1c3d8089be1548d8c3b4b66965fa84246199cbc108b94d95848c1",
+   "address": "kaspa:qxqqgjs7jvrvrs7cpzd7z4yd3sa5ke5kt75yy3senj7ppzu5m9vy3sgn6qe48vu"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 8,
+   "payload": "1a2ef2cb5070efaf68881e9890b390581f85ad17f495d16bbc90bb5bd1234285",
+   "address": "kaspasim:pqdzaukt2pcwltmg3q0f3y9njpvplpddzl6ft5tthjgtkk73ydpg224ldtldw"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 8,
+   "payload": "9ace861af42c9f097dbcb999f9d9a7aa7978fc0a132e79f2d68af5d18809e188",
+   "address": "kaspasim:pzdvaps67skf7ztahjuen7we5748j78upgfju70j6690t5vgp8scsmvjgpvhh"
+  },
+  {
+   "prefix": "kaspatest",
+   "version": 8,
+   "payload": "e12c54e718aaa0dd903ea421fa973c942e1886a60fcbe73919a8a310944b3756",
+   "address": "kaspatest:prsjc488rz42phvs86jzr75h8j2zuxyx5c8uheeerx52xyy5fvm4vvtaq94vg"
+  },
+  {
+   "prefix": "kaspasim",
+   "version": 8,
+   "payload": "ceaeb2fda48395c76c1c7448edad674b1b7323e44a97f7d20892fdc6bbcb63ec",
+   "address": "kaspasim:pr82avha5jpet3mvr36y3mddva93kueru39f0a7jpzf0m34med37c4fwu94lz"
+  }
+ ]
+}

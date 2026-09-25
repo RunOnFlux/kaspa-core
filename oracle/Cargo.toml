@@ -1,0 +1,20 @@
+[package]
+name = "kaspa-core-oracle"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Dev-only differential oracle for @runonflux/kaspa-core. Links rusty-kaspa's own consensus and script-engine crates so the TypeScript library can be checked byte-for-byte, and its transactions executed by the real engine, without funds. Never shipped."
+
+# Pinned to the rusty-kaspa commit the library was verified against.
+# Bump deliberately on each hard fork, then regenerate test/fixtures/*.json.
+[dependencies]
+kaspa-consensus-core = { git = "https://github.com/kaspanet/rusty-kaspa", rev = "01b532e8b553523216471682649693af92f0fd16" }
+kaspa-txscript = { git = "https://github.com/kaspanet/rusty-kaspa", rev = "01b532e8b553523216471682649693af92f0fd16" }
+kaspa-addresses = { git = "https://github.com/kaspanet/rusty-kaspa", rev = "01b532e8b553523216471682649693af92f0fd16" }
+kaspa-hashes = { git = "https://github.com/kaspanet/rusty-kaspa", rev = "01b532e8b553523216471682649693af92f0fd16" }
+secp256k1 = { version = "=0.29.1", features = ["global-context"] }
+serde_json = "=1.0.151"
+hex = "=0.4.3"
+
+[profile.release]
+opt-level = 2

@@ -1,0 +1,4 @@
+dist
+oracle/target
+test/fixtures
+coverage
