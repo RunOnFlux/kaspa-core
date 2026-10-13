@@ -310,18 +310,29 @@ function assertStandardRecipient(spk: ScriptPublicKey, index: number): void {
 type PayResult =
   | { kind: 'ok'; planned: PlannedTransaction }
   | { kind: 'insufficient' }
-  /** Funds suffice but the change can neither be output nor folded into the fee. */
-  | { kind: 'unfoldable-change'; change: bigint; storageMass: bigint };
+  /**
+   * Funds suffice but the change can neither be output cheaply nor folded into
+   * the fee. `fallback`, when present, is a valid plan with a storage-heavy
+   * change, used only if no other input count pays.
+   */
+  | {
+      kind: 'unfoldable-change';
+      change: bigint;
+      storageMass: bigint;
+      fallback?: PlannedTransaction;
+    };
 
 /**
  * Try to pay `recipients` from exactly `inputs`. Throws MassCapExceeded when
- * the inputs cannot fit in one transaction even without change.
+ * the inputs cannot fit in one transaction even without change. Without
+ * `fullSearch`, a change amount is only looked for by the quick descent.
  */
 function tryPay(
   inputs: readonly InputPlan[],
   recipients: readonly Recipient[],
   r: Resolved,
   sendAll: boolean,
+  fullSearch = true,
 ): PayResult {
   const totalIn = inputs.reduce((a, p) => a + p.entry.amount, 0n);
 
@@ -352,33 +363,147 @@ function tryPay(
     throw new MassCapExceededError(noChange.mass.max, r.maxMass);
   if (totalIn < target + noChange.fee) return { kind: 'insufficient' };
 
-  // Try with change, iterating because change affects storage mass affects fee.
-  let fee = noChange.fee;
-  let lastStorage = 0n;
-  for (let k = 0; k < 8; k++) {
-    const change = totalIn - target - fee;
-    if (change <= 0n || change < r.foldThreshold) break;
-    const outs = [...base, { scriptPublicKey: r.changeSpk, value: change }];
-    const f = feeFor(inputs, outs, r);
-    lastStorage = f.mass.storage ?? 0n;
-    if (f.mass.max > r.maxMass) break;
-    if (f.fee <= fee)
-      return {
-        kind: 'ok',
-        planned: finish(inputs, outs, fee, r, base.length),
-      };
-    fee = f.fee;
-  }
+  // Try with change. The fee depends on the change through storage mass
+  // (~C/change), so pick the largest change c whose own fee fits:
+  // c + fee(c) <= totalIn - target. The fee pays any rounding remainder.
+  const avail = totalIn - target;
+  const best = largestChange(
+    inputs,
+    base,
+    avail,
+    avail - noChange.fee,
+    r,
+    fullSearch,
+  );
+  const withChange = (change: bigint) =>
+    finish(
+      inputs,
+      [...base, { scriptPublicKey: r.changeSpk, value: change }],
+      avail - change,
+      r,
+      base.length,
+    );
+  if (best.change !== null && best.quick)
+    return { kind: 'ok', planned: withChange(best.change) };
 
   // Fold the (small, or unrepresentable) change into the fee — within limits.
-  const folded = totalIn - target - noChange.fee;
-  if (folded > r.maxFold)
+  const folded = avail - noChange.fee;
+  if (folded > r.maxFold) {
+    // A change found only by the full search is storage-heavy: the caller
+    // tries more inputs first (a larger change costs less) and falls back
+    // to this plan instead of refusing.
+    let fallback: PlannedTransaction | undefined;
+    if (best.change !== null) {
+      try {
+        fallback = withChange(best.change);
+      } catch {
+        fallback = undefined;
+      }
+    }
     return {
       kind: 'unfoldable-change',
       change: folded,
-      storageMass: lastStorage,
+      storageMass: best.storage,
+      ...(fallback ? { fallback } : {}),
     };
-  return { kind: 'ok', planned: finish(inputs, base, totalIn - target, r) };
+  }
+  if (best.change !== null)
+    return { kind: 'ok', planned: withChange(best.change) };
+  return { kind: 'ok', planned: finish(inputs, base, avail, r) };
+}
+
+/**
+ * The largest change c in [foldThreshold, hi] such that the transaction with
+ * that change output fits the mass cap and c + fee(c) <= avail; null if none.
+ * `storage` is the storage mass of a change of `hi` (for the error); `quick`
+ * means the descent found it, as the pre-1.0.1 loop would have.
+ *
+ * fee(c) never increases with c (storage mass ~ C/c) and is never below the
+ * no-change fee, so the valid set is an interval [a, b] with b <= hi.
+ * Iterating c <- avail - fee(c) from hi descends onto b without passing it;
+ * that settles in a round or two unless storage mass dominates. Otherwise
+ * find the minimum of c + fee(c) (near convex; ternary search) and bisect
+ * between it and the descent's last point. Without `fullSearch` only the
+ * descent runs.
+ */
+function largestChange(
+  inputs: readonly InputPlan[],
+  base: readonly TransactionOutput[],
+  avail: bigint,
+  hi: bigint,
+  r: Resolved,
+  fullSearch: boolean,
+): { change: bigint | null; storage: bigint; quick?: boolean } {
+  const lo = r.foldThreshold > 0n ? r.foldThreshold : 1n;
+  const at = (c: bigint) => {
+    const f = feeFor(
+      inputs,
+      [...base, { scriptPublicKey: r.changeSpk, value: c }],
+      r,
+    );
+    const fits = f.mass.max <= r.maxMass;
+    return {
+      fits,
+      ok: fits && c + f.fee <= avail,
+      fee: f.fee,
+      storage: f.mass.storage ?? 0n,
+    };
+  };
+  if (hi < lo) return { change: null, storage: 0n };
+  const top = at(hi);
+  const none = { change: null, storage: top.storage };
+
+  // Descent: every iterate is >= b, and mass only shrinks as c grows, so an
+  // iterate over the cap (or below lo) means no change amount works.
+  let c = hi;
+  let p = top;
+  for (let k = 0; k < 8; k++) {
+    if (p.ok) return { change: c, storage: top.storage, quick: true };
+    if (!p.fits) return none;
+    c = avail - p.fee;
+    if (c < lo) return none;
+    p = at(c);
+  }
+  if (!fullSearch || !p.fits) return none;
+  if (p.ok) return { change: c, storage: top.storage };
+
+  // Smallest amount under the mass cap.
+  let a = lo;
+  if (!at(a).fits) {
+    let bad = a;
+    let good = c;
+    while (good - bad > 1n) {
+      const mid = bad + (good - bad) / 2n;
+      if (at(mid).fits) good = mid;
+      else bad = mid;
+    }
+    a = good;
+  }
+
+  // Minimum of c + fee(c) over [a, c].
+  const score = (x: bigint) => x + at(x).fee;
+  let b = c;
+  while (b - a > 2n) {
+    const m1 = a + (b - a) / 3n;
+    const m2 = b - (b - a) / 3n;
+    if (score(m1) <= score(m2)) b = m2;
+    else a = m1;
+  }
+  let found: bigint | null = null;
+  for (let x = a; x <= b && found === null; x++) {
+    if (at(x).ok) found = x;
+  }
+  if (found === null) return none;
+
+  // at(ok) holds and at(c) does not: bisect for the boundary.
+  let ok: bigint = found;
+  let bad = c;
+  while (bad - ok > 1n) {
+    const mid = ok + (bad - ok) / 2n;
+    if (at(mid).ok) ok = mid;
+    else bad = mid;
+  }
+  return { change: ok, storage: top.storage };
 }
 
 function consolidationStage(
@@ -521,6 +646,7 @@ export function planTransaction(
   const allowChain = opts.allowChain ?? true;
   let unfoldable: Extract<PayResult, { kind: 'unfoldable-change' }> | null =
     null;
+  let fallback: PlannedTransaction | null = null;
   let hitCap = false;
 
   // Single-transaction attempt: grow the input set until it pays.
@@ -529,7 +655,13 @@ export function planTransaction(
   for (let k = first; k <= limit; k++) {
     let res: PayResult;
     try {
-      res = tryPay([...required, ...pool.slice(0, k)], recipients, r, sendAll);
+      res = tryPay(
+        [...required, ...pool.slice(0, k)],
+        recipients,
+        r,
+        sendAll,
+        !fallback,
+      );
     } catch (e) {
       if (!(e instanceof MassCapExceededError)) throw e;
       hitCap = true;
@@ -538,7 +670,9 @@ export function planTransaction(
     if (res.kind === 'ok')
       return { stages: [], final: res.planned, totalFee: res.planned.fee };
     unfoldable = res.kind === 'unfoldable-change' ? res : null;
+    fallback ??= unfoldable?.fallback ?? null;
   }
+  if (fallback) return { stages: [], final: fallback, totalFee: fallback.fee };
   if (!hitCap && unfoldable && pool.length <= limit) {
     throw new ChangeWouldBeDustError(unfoldable.change, unfoldable.storageMass);
   }
@@ -619,11 +753,19 @@ function payFromQueue(
   r: Resolved,
 ): PayResult {
   let last: PayResult = { kind: 'insufficient' };
+  let fallback: PlannedTransaction | null = null;
   for (let k = r.required.length > 0 ? 0 : 1; k <= queue.length; k++) {
-    last = tryPay([...r.required, ...queue.slice(0, k)], recipients, r, false);
+    last = tryPay(
+      [...r.required, ...queue.slice(0, k)],
+      recipients,
+      r,
+      false,
+      !fallback,
+    );
     if (last.kind === 'ok') return last;
+    if (last.kind === 'unfoldable-change') fallback ??= last.fallback ?? null;
   }
-  return last;
+  return fallback ? { kind: 'ok', planned: fallback } : last;
 }
 
 /** How much more is needed, fees included, so the caller can show a real number. */

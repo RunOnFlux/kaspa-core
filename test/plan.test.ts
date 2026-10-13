@@ -1,11 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { p2pkScript } from '../src/script/standard.js';
 import { localSigner } from '../src/sign.js';
-import { multisigSpend, spendScriptPublicKey } from '../src/spend.js';
+import {
+  multisigSpend,
+  spendScriptPublicKey,
+  spendSigOpCount,
+  spendSignatureScriptSize,
+} from '../src/spend.js';
 import type { InputPlan, Spend } from '../src/spend.js';
 import { planConsolidation, planTransaction } from '../src/plan.js';
 import type { PlannedTransaction } from '../src/plan.js';
-import { computeMass, minimumRelayFee } from '../src/mass.js';
+import {
+  computeMass,
+  feeForRate,
+  massBreakdown,
+  minimumRelayFee,
+} from '../src/mass.js';
 import {
   ChangeWouldBeDustError,
   InsufficientFundsError,
@@ -17,6 +27,8 @@ import {
   SOMPI_PER_KASPA,
 } from '../src/constants.js';
 import { Rng, TEST_XONLY } from './helpers/random.js';
+import { kaspaToSompi } from '../src/units.js';
+import type { ScriptPublicKey, Transaction } from '../src/tx/model.js';
 
 const KAS = SOMPI_PER_KASPA;
 const rng0 = new Rng(500);
@@ -337,4 +349,188 @@ describe('reference mass table (plan §7)', () => {
       expect(computeMass(tx)).toBe(expected);
     },
   );
+});
+
+describe('planTransaction: small change with storage mass', () => {
+  // Storage mass of a change output c is about C/c, so the fee moves with the
+  // change. The old fixed-point loop gave up after 8 rounds and refused sends
+  // (ChangeWouldBeDustError) that had a valid change amount.
+  const TOTAL = 5n * KAS;
+  const MAX_FOLD = KAS / 10n;
+  const CHANGE_SPK = spendScriptPublicKey(SINGLE);
+  const rng = new Rng(7070);
+  const inputs = [utxo(rng, SINGLE, TOTAL)];
+  const opts = (feeRate: bigint) => ({
+    feeRate,
+    changeSpend: SINGLE,
+    maxFoldToFee: MAX_FOLD,
+  });
+
+  /** The signed-size transaction paying `outputs` from `ins`, built independently of the planner. */
+  function sizedTx(
+    ins: readonly InputPlan[],
+    outputs: readonly [ScriptPublicKey, bigint][],
+  ): Transaction {
+    return {
+      version: 0,
+      inputs: ins.map((u) => ({
+        previousOutpoint: u.outpoint,
+        signatureScript: new Uint8Array(spendSignatureScriptSize(u.spend)),
+        sequence: 0n,
+        sigOpCount: spendSigOpCount(u.spend),
+      })),
+      outputs: outputs.map(([scriptPublicKey, value]) => ({
+        scriptPublicKey,
+        value,
+      })),
+      lockTime: 0n,
+      subnetworkId: new Uint8Array(20),
+      gas: 0n,
+      payload: new Uint8Array(0),
+    };
+  }
+
+  /** Fee at `rate` and max mass for paying `target` to DST plus `change`. */
+  function withChange(
+    ins: readonly InputPlan[],
+    target: bigint,
+    change: bigint,
+    rate: bigint,
+  ): { fee: bigint; mass: bigint } {
+    const tx = sizedTx(ins, [
+      [DST, target],
+      [CHANGE_SPK, change],
+    ]);
+    const entries = ins.map((u) => u.entry);
+    return {
+      fee: feeForRate(tx, entries, rate),
+      mass: massBreakdown(tx, entries).max,
+    };
+  }
+
+  describe.each([100n, 1000n])('fee rate %s', (rate) => {
+    it.each(['0.12', '0.15', '0.2', '0.25', '0.3', '0.4'])(
+      'pays when a %s KAS change is affordable',
+      (kas) => {
+        const wanted = kaspaToSompi(kas);
+        // Pick the target so that a change of exactly `wanted` is affordable.
+        const at = withChange(inputs, TOTAL / 2n, wanted, rate);
+        expect(at.mass <= MAXIMUM_STANDARD_TRANSACTION_MASS).toBe(true);
+        const target = TOTAL - wanted - at.fee;
+        const plan = planTransaction(
+          inputs,
+          [{ scriptPublicKey: DST, amount: target }],
+          opts(rate),
+        );
+        const f = plan.final;
+        assertInvariants(f);
+        expect(plan.stages).toHaveLength(0);
+        expect(plan.totalFee).toBe(f.fee);
+        expect(f.changeIndex).toBe(1);
+        expect(f.tx.outputs[0]!.value).toBe(target);
+        const change = f.tx.outputs[1]!.value;
+        // The largest affordable change, give or take the fee's rounding steps.
+        expect(change >= wanted - 100_000n).toBe(true);
+        expect(change >= MAX_FOLD).toBe(true);
+        // The fee covers this exact shape; any overpay is a rounding remainder.
+        const exact = withChange(inputs, target, change, rate).fee;
+        expect(f.fee >= exact).toBe(true);
+        expect(f.fee - exact <= 100_000n).toBe(true);
+        expect(f.fee >= f.mass.max * rate).toBe(true);
+      },
+    );
+  });
+
+  it('keeps a large change exact (the old loop settles; same plan as before)', () => {
+    const plan = planTransaction(
+      inputs,
+      [{ scriptPublicKey: DST, amount: 1n * KAS }],
+      opts(1n),
+    );
+    const f = plan.final;
+    assertInvariants(f);
+    const change = f.tx.outputs[1]!.value;
+    expect(f.fee).toBe(withChange(inputs, 1n * KAS, change, 1n).fee);
+    expect(change).toBe(TOTAL - 1n * KAS - f.fee);
+  });
+
+  it('pays from two inputs with a small change', () => {
+    const r2 = new Rng(7071);
+    const two = [utxo(r2, SINGLE, 2n * KAS), utxo(r2, SINGLE, 3n * KAS)];
+    const wanted = kaspaToSompi('0.2');
+    const { fee } = withChange(two, 4n * KAS, wanted, 100n);
+    const target = TOTAL - wanted - fee;
+    const plan = planTransaction(
+      two,
+      [{ scriptPublicKey: DST, amount: target }],
+      opts(100n),
+    );
+    assertInvariants(plan.final);
+    expect(plan.final.inputs).toHaveLength(2);
+    expect(plan.final.tx.outputs).toHaveLength(2);
+    expect(plan.final.tx.outputs[1]!.value >= wanted - 100_000n).toBe(true);
+  });
+
+  it('still prefers adding an input over a storage-heavy small change', () => {
+    const r2 = new Rng(7072);
+    const pool = [utxo(r2, SINGLE, TOTAL), utxo(r2, SINGLE, 1n * KAS)];
+    const wanted = kaspaToSompi('0.2');
+    const { fee } = withChange([pool[0]!], TOTAL / 2n, wanted, 100n);
+    const target = TOTAL - wanted - fee;
+    const plan = planTransaction(
+      pool,
+      [{ scriptPublicKey: DST, amount: target }],
+      opts(100n),
+    );
+    assertInvariants(plan.final);
+    // The second input makes the change large, so storage mass (and the fee) stays small.
+    expect(plan.final.inputs).toHaveLength(2);
+    expect(plan.final.fee < fee).toBe(true);
+  });
+
+  it('still folds a tiny change into the fee', () => {
+    const target = TOTAL - 300_000n;
+    const plan = planTransaction(
+      inputs,
+      [{ scriptPublicKey: DST, amount: target }],
+      opts(1n),
+    );
+    assertInvariants(plan.final);
+    expect(plan.final.tx.outputs).toHaveLength(1);
+    expect(plan.final.changeIndex).toBeUndefined();
+    expect(plan.final.fee).toBe(300_000n);
+  });
+
+  it('still refuses, or folds within the limit, when no change amount is affordable', () => {
+    // At 1000 sompi/gram a change c costs about 1e15/c sompi, so c + fee(c)
+    // never drops below ~0.63 KAS: no change fits in a 0.3 KAS leftover.
+    const left = kaspaToSompi('0.3');
+    for (let c = 1_000_000n; c < left; c += 100_000n) {
+      const { fee, mass } = withChange(inputs, TOTAL - left, c, 1000n);
+      expect(mass > MAXIMUM_STANDARD_TRANSACTION_MASS || c + fee > left).toBe(
+        true,
+      );
+    }
+    const recipients = [{ scriptPublicKey: DST, amount: TOTAL - left }];
+    expect(() => planTransaction(inputs, recipients, opts(1000n))).toThrow(
+      ChangeWouldBeDustError,
+    );
+    const folded = planTransaction(inputs, recipients, {
+      ...opts(1000n),
+      maxFoldToFee: KAS,
+    });
+    assertInvariants(folded.final);
+    expect(folded.final.tx.outputs).toHaveLength(1);
+    expect(folded.final.fee).toBe(left);
+  });
+
+  it('send-all is unchanged', () => {
+    const plan = planTransaction(
+      inputs,
+      [{ scriptPublicKey: DST, amount: 0n }],
+      { ...opts(100n), sendAll: true },
+    );
+    expect(plan.final.tx.outputs).toHaveLength(1);
+    expect(plan.final.tx.outputs[0]!.value + plan.final.fee).toBe(TOTAL);
+  });
 });

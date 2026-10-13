@@ -81,17 +81,25 @@ let stringifyCounter = 0;
 export function stringifyWithBigInt(value: unknown): string {
   stringifyCounter = (stringifyCounter + 1) % 0x7fffffff;
   const marker = `__kaspa_u64_${String(stringifyCounter)}_${Math.random().toString(36).slice(2)}__`;
-  const s = JSON.stringify(value, (k, v: unknown) => {
-    if (k.includes(marker) || (typeof v === 'string' && v.includes(marker)))
-      throw new KaspaError(
-        'INVALID_INPUT',
-        'input collides with the bigint marker',
-      );
-    if (typeof v !== 'bigint') return v;
-    if (v < 0n || v > U64_MAX)
-      throw new KaspaError('INVALID_INPUT', 'bigint outside the u64 range');
-    return `${marker}${v.toString()}`;
-  });
+  // Read the raw value from the holder: when something (e.g. @alephium/web3)
+  // installs BigInt.prototype.toJSON, JSON.stringify calls it before the
+  // replacer and `v` arrives as a string, so u64 fields would go out quoted.
+  const s = JSON.stringify(
+    value,
+    function (this: Record<string, unknown>, k: string, v: unknown) {
+      const raw = this[k];
+      if (k.includes(marker) || (typeof v === 'string' && v.includes(marker)))
+        throw new KaspaError(
+          'INVALID_INPUT',
+          'input collides with the bigint marker',
+        );
+      const n = typeof raw === 'bigint' ? raw : v;
+      if (typeof n !== 'bigint') return v;
+      if (n < 0n || n > U64_MAX)
+        throw new KaspaError('INVALID_INPUT', 'bigint outside the u64 range');
+      return `${marker}${n.toString()}`;
+    },
+  );
   return s.replace(new RegExp(`"${marker}(\\d+)"`, 'g'), '$1');
 }
 

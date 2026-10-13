@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { encodeAddress } from '../src/address.js';
 import { bytesToHex } from '../src/bytes.js';
 import {
@@ -34,6 +34,7 @@ import type {
 } from '../src/wrpc.js';
 import { Rng, TEST_XONLY, xonly } from './helpers/random.js';
 import { parseJsonSafe, stringifyWithBigInt } from '../src/net/common.js';
+import { installBigIntToJSON } from './helpers/bigint-tojson.js';
 
 /** What the node would see on the wire. */
 const wire = (x: unknown): unknown => parseJsonSafe(stringifyWithBigInt(x));
@@ -921,4 +922,69 @@ describe('wRPC review: encoding and validation edge cases', () => {
       rest.getUtxos([encodeAddress('kaspatest', 0, TEST_XONLY)]),
     ).rejects.toThrow(KaspaError);
   });
+});
+
+describe('a global BigInt.prototype.toJSON (e.g. @alephium/web3) does not quote u64s', () => {
+  let restore: () => void = () => undefined;
+  beforeEach(() => {
+    restore = installBigIntToJSON();
+  });
+  afterEach(() => {
+    restore();
+  });
+
+  it('the hook is installed and quotes bigints in plain JSON.stringify', () => {
+    expect(JSON.stringify({ a: 1n })).toBe('{"a":"1"}');
+  });
+
+  it('emits bare integers in nested objects and arrays, near 2^64 - 1, and at the root', () => {
+    expect(stringifyWithBigInt({ a: 1n })).toBe('{"a":1}');
+    expect(stringifyWithBigInt(5n)).toBe('5');
+    expect(stringifyWithBigInt([1n, { b: [2n, 3] }, 'x'])).toBe(
+      '[1,{"b":[2,3]},"x"]',
+    );
+    expect(stringifyWithBigInt({ o: { p: { q: 0n } }, s: '10', n: 7 })).toBe(
+      '{"o":{"p":{"q":0}},"s":"10","n":7}',
+    );
+    expect(stringifyWithBigInt({ max: (1n << 64n) - 1n })).toBe(
+      '{"max":18446744073709551615}',
+    );
+    expect(stringifyWithBigInt({ near: (1n << 64n) - 2n })).toBe(
+      '{"near":18446744073709551614}',
+    );
+    expect(stringifyWithBigInt({ a: '123', b: 123n })).toBe(
+      '{"a":"123","b":123}',
+    );
+  });
+
+  it('still refuses bigints outside the u64 range', () => {
+    expect(() => stringifyWithBigInt({ a: 1n << 64n })).toThrow(/u64/);
+    expect(() => stringifyWithBigInt({ a: -1n })).toThrow(/u64/);
+    expect(() => stringifyWithBigInt([1n << 70n])).toThrow(/u64/);
+    expect(() => stringifyWithBigInt(-5n)).toThrow(/u64/);
+  });
+
+  it.each([0, 1] as const)(
+    'v%s: the submitTransaction frame carries u64 fields as bare integers',
+    async (version) => {
+      const { tx } = await signedTx(version, Uint8Array.of(1, 2, 3));
+      const id = bytesToHex(transactionId(tx));
+      const node = new FakeNode();
+      node.handlers.submitTransaction = () => ({ transactionId: id });
+      const c = client(node);
+      expect(await c.submitTransaction(tx)).toBe(id);
+      const raw = node.received.find(
+        (r) => r.req.method === 'submitTransaction',
+      )!.raw;
+      expect(raw).not.toMatch(/"(value|sequence|lockTime|gas|mass)":"/);
+      expect(raw).toContain(`"value":${String(tx.outputs[0]!.value)}`);
+      expect(raw).toContain('"sequence":0');
+      expect(raw).toContain('"lockTime":0');
+      const sent = JSON.parse(raw) as {
+        params: { transaction: { outputs: { value: unknown }[] } };
+      };
+      expect(typeof sent.params.transaction.outputs[0]!.value).toBe('number');
+      c.close();
+    },
+  );
 });
