@@ -73,5 +73,9 @@ jobs:
 
       # --ignore-scripts: publish exactly the tarball of what was built and
       # tested above (prepublishOnly would only repeat the same steps).
-      - name: Publish with provenance
-        run: npm publish --provenance --access public --ignore-scripts
+      - name: Stage publish with provenance (maintainer approves on npm)
+        # Staged publishing: CI uploads the version (with provenance) but it is
+        # NOT live until a maintainer approves it with 2FA on npmjs.com or via
+        # `npm stage approve <stage-id>`. The npm trusted publisher is configured
+        # without 'Allow npm publish', so a direct `npm publish` would be refused.
+        run: npm stage publish --provenance --access public --ignore-scripts
