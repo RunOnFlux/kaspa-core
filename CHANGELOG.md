@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1 — 2026-10-13
+
+### Fixed
+
+- `stringifyWithBigInt` reads the raw value, so u64 fields stay bare JSON integers when another library installs `BigInt.prototype.toJSON` (e.g. `@alephium/web3`). They went out as quoted strings, and JSON wRPC rejected `submitTransaction` with "request deserialization error" (REST tolerated it).
+- The change planner no longer refuses sends that leave a small change (about 0.15–0.4 KAS) at higher fee rates with `ChangeWouldBeDustError`. Storage mass makes the fee depend on the change, and the fixed-point loop did not settle in 8 rounds; it now finds the largest change whose own fee fits. Plans the old loop settled on are unchanged, adding an input is still preferred over a storage-heavy change, and folding is unchanged when no change amount fits.
+
 ## 1.0.0 — 2026-09-25
 
 First stable release. The API is unchanged from 0.3.0.

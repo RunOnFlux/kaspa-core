@@ -1,6 +1,6 @@
 {
   "name": "@runonflux/kaspa-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pure-TypeScript Kaspa transaction library: addresses, scripts, M-of-N P2SH multisig, sighash, BIP340 signing, KIP-9 mass and fee, input selection. No WASM, two dependencies.",
   "license": "MIT",
   "author": "RunOnFlux",
