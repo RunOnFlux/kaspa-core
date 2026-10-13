@@ -1,6 +1,6 @@
 import { Rng, TEST_XONLY, xonly } from './helpers/random.js';
 import { encodeAddress } from '../src/address.js';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   createRestClient,
   parseJsonSafe,
@@ -14,6 +14,7 @@ import type { Transaction } from '../src/tx/model.js';
 import { bytesToHex } from '../src/bytes.js';
 import { transactionId } from '../src/tx/encode.js';
 import { stringifyWithBigInt } from '../src/net/common.js';
+import { installBigIntToJSON } from './helpers/bigint-tojson.js';
 
 type Call = { url: string; init: FetchInitLike | undefined };
 
@@ -309,5 +310,30 @@ describe('REST funding-transaction proofs', () => {
     await expect(
       client(restView(tx)).getFundingTransaction('zz'),
     ).rejects.toThrow(KaspaError);
+  });
+});
+
+describe('REST with a global BigInt.prototype.toJSON (e.g. @alephium/web3)', () => {
+  let restore: () => void = () => undefined;
+  beforeEach(() => {
+    restore = installBigIntToJSON();
+  });
+  afterEach(() => {
+    restore();
+  });
+
+  it('submits u64 fields as bare JSON integers', async () => {
+    const id = bytesToHex(transactionId(tx));
+    const { f, calls } = mockFetch(() => ({
+      body: JSON.stringify({ transactionId: id }),
+    }));
+    expect(
+      await createRestClient({ baseUrl: 'https://x.test', fetch: f }).submit(
+        tx,
+      ),
+    ).toBe(id);
+    const body = String(calls[0]!.init!.body);
+    expect(body).toContain('"amount":2900000000000000000');
+    expect(body).not.toMatch(/"(amount|sequence|lockTime)":"/);
   });
 });
