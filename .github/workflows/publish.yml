@@ -1,0 +1,77 @@
+name: Publish to npm
+
+# Publishes @runonflux/kaspa-core from CI with npm trusted publishing (OIDC)
+# and a signed provenance attestation, so consumers can check that a given
+# npm version was built from this repository at a given tag
+# (`npm audit signatures`). There is no long-lived npm token anywhere: npm
+# exchanges this job's short-lived GitHub OIDC token for a publish credential,
+# and only for the repo + workflow file + environment configured as the
+# package's trusted publisher on npmjs.com.
+#
+# Release: bump package.json "version", merge to main, then push tag vX.Y.Z.
+on:
+  push:
+    tags: ['v*']
+
+# Nothing by default; the job below asks for exactly what it needs.
+permissions: {}
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: verify, test, build, publish (provenance)
+    runs-on: ubuntu-latest
+    # Required reviewers + "selected tags: v*" are configured on this
+    # environment in the repo settings; the npm trusted publisher is bound to it.
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write # OIDC token for npm trusted publishing + provenance
+    steps:
+      # Third-party actions are pinned to full commit SHAs (tags can be moved).
+      # No dependency caches in this job: a release must not restore state
+      # written by other workflow runs (cache poisoning).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master 2026-09-12 (toolchain given explicitly)
+        with:
+          toolchain: stable
+
+      # Trusted publishing needs npm >= 11.5.1. Pinned exactly.
+      - name: Pin npm
+        run: npm install -g --ignore-scripts npm@11.19.1 && npm --version
+
+      - name: Tag must equal package.json version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "v${version}" ]; then
+            echo "::error::tag ${TAG} does not match package.json version ${version}"
+            exit 1
+          fi
+
+      # Lifecycle scripts of dependencies never run on the release runner.
+      - run: yarn install --frozen-lockfile --ignore-scripts
+      - run: yarn audit --groups dependencies
+      - run: yarn type-check
+      - run: yarn lint
+      - run: yarn format:check
+      # Differential tests against rusty-kaspa need the oracle binary.
+      - name: Build rusty-kaspa oracle (locked)
+        run: cargo build --release --locked --manifest-path oracle/Cargo.toml
+      - run: yarn test
+      - run: yarn build
+
+      # --ignore-scripts: publish exactly the tarball of what was built and
+      # tested above (prepublishOnly would only repeat the same steps).
+      - name: Publish with provenance
+        run: npm publish --provenance --access public --ignore-scripts
